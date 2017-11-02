@@ -9,9 +9,9 @@ namespace LastPass
 {
     public class Vault
     {
-        public static Vault Create(string username, string password, string multifactorPassword = null)
+        public static Vault Create(string username, string password, string multifactorPassword = null, string uuid = null, string trustlabel = null)
         {
-            return Create(Download(username, password, multifactorPassword), username, password);
+            return Create(Download(username, password, multifactorPassword, uuid, trustlabel), username, password);
         }
 
         // TODO: Make a test for this!
@@ -20,9 +20,9 @@ namespace LastPass
             return new Vault(blob, blob.MakeEncryptionKey(username, password));
         }
 
-        public static Blob Download(string username, string password, string multifactorPassword = null)
+        public static Blob Download(string username, string password, string multifactorPassword = null, string uuid = null, string trustlabel = null)
         {
-            return Fetcher.Fetch(Fetcher.Login(username, password, multifactorPassword));
+            return Fetcher.Fetch(Fetcher.Login(username, password, multifactorPassword, uuid, trustlabel));
         }
 
         // TODO: Make a test for this!

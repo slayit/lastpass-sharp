@@ -12,19 +12,19 @@ namespace LastPass
 {
     static class Fetcher
     {
-        public static Session Login(string username, string password, string multifactorPassword)
+        public static Session Login(string username, string password, string multifactorPassword, string uuid, string trustlabel)
         {
             using (var webClient = new WebClient())
-                return Login(username, password, multifactorPassword, webClient);
+                return Login(username, password, multifactorPassword, webClient, uuid, trustlabel);
         }
 
-        public static Session Login(string username, string password, string multifactorPassword, IWebClient webClient)
+        public static Session Login(string username, string password, string multifactorPassword, IWebClient webClient, string uuid, string trustlabel)
         {
             // First we need to request PBKDF2 key interation count
             var keyIterationCount = RequestIterationCount(username, webClient);
 
             // Knowing the iterations count we can hash the password and log in
-            var response = Login(username, password, multifactorPassword, keyIterationCount, webClient);
+            var response = Login(username, password, multifactorPassword, keyIterationCount, webClient, uuid, trustlabel);
 
             // Parse the response
             var ok = response.XPathSelectElement("ok");
@@ -100,7 +100,9 @@ namespace LastPass
                                        string password,
                                        string multifactorPassword,
                                        int keyIterationCount,
-                                       IWebClient webClient)
+                                       IWebClient webClient,
+                                       string uuid,
+                                       string trustlabel)
         {
             try
             {
@@ -116,6 +118,12 @@ namespace LastPass
 
                 if (multifactorPassword != null)
                     parameters["otp"] = multifactorPassword;
+
+                if (!string.IsNullOrEmpty(uuid) && !string.IsNullOrEmpty(trustlabel))
+                {
+                    parameters["uuid"] = uuid;
+                    parameters["trustlabel"] = trustlabel;
+                }
 
                 return XDocument.Parse(webClient.UploadValues("https://lastpass.com/login.php",
                                                               parameters).ToUtf8());
